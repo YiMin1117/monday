@@ -26,11 +26,10 @@ export function SearchPage(){
     }
     const [search_input, setSearchInput] = useState(test)
     return (
-        <>
+        <div className="bg-slate-200 p-5 flex flex-col justify-center">
             <SearchArea search_input={search_input} setSearchInput={setSearchInput}/>
-            <button>Search button</button>
             <ResultArea search_result={temp_data} />
-        </>
+        </div>
     );
 
 }
