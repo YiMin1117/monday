@@ -22,7 +22,7 @@ const temp_data = {
 export function SearchPage(){
     const test_init = {
         searchBy:"target",
-        Gene_Name:"",
+        Gene_Name:"我操你媽，變數名稱給我固定大小寫",
     }
     const [search_input, setSearchInput] = useState(test_init)
     const [search_result, setSearchResult] = useState(null)
