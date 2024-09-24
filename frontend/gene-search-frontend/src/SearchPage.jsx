@@ -20,16 +20,19 @@ const temp_data = {
 }
 
 export function SearchPage(){
-    const test = {
+    const test_init = {
         searchBy:"target",
         gene_name:"123456789",
     }
-    const [search_input, setSearchInput] = useState(test)
+    const [search_input, setSearchInput] = useState(test_init)
+
     return (
         <div className="bg-slate-200 p-5 flex flex-col justify-center">
             <SearchArea search_input={search_input} setSearchInput={setSearchInput}/>
             <ResultArea search_result={temp_data} />
+        
         </div>
+
     );
 
 }
