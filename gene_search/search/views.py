@@ -1,25 +1,32 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest, HttpResponse
+
 from .models import BigTableV2  # 將模型替換為 BigTableV2
 
-def get_gene_data(request):
+import json
+
+def getJSON(request:HttpRequest):
+    body_unicode = request.body.decode('utf-8')
+    body_data = json.loads(body_unicode)
+    return body_data
+
+def test(request:HttpRequest):
+    return HttpResponse("Hello")
+
+def get_gene(request):
+    
+    """
+    searchInput:{
+        searchBy:str, // "target" or "regulator"
+        Gene_Name:str, // input string
+    }
+    """
+    search_input = getJSON(request)
     try:
-        # 查詢資料庫中的前5筆資料
-        records = BigTableV2.objects.all()[:5]
-        
-        # 創建一個列表來保存資料
-        gene_data = []
-        for record in records:
-            gene_data.append({
-                'gene_id': record.gene_id,
-                'gene_name': record.gene_name,
-                'sequence_name': record.sequence_name,
-                'transcript_name': record.transcript_name,
-            })
-        
+        records = BigTableV2.objects.get(Gene_Name=search_input["Gene_Name"])
         # 返回JSON響應
         response = {
             'status': 'success',
-            'data': gene_data
+            'data': records.get_dict()
         }
     except Exception as e:
         # 如果發生錯誤，返回錯誤信息
