@@ -24,10 +24,11 @@ def get_gene(request):
     try:
         # 使用 Q 物件進行多字段查詢，查找匹配的記錄
         records = BigTableV2.objects.filter(
-            Q(Gene_Name__icontains=search_term) |
-            Q(Sequence_Name__icontains=search_term) |
-            Q(Other_Name__icontains=search_term) |
-            Q(Transcript_Name__icontains=search_term)
+            Q(Gene_ID__iexact=search_term)|
+            Q(Gene_Name__iexact=search_term) |
+            Q(Sequence_Name__iexact=search_term) |
+            Q(Other_Name__iexact=search_term) |
+            Q(Transcript_Name__iexact=search_term)
         )
         
         # 檢查是否有找到記錄
