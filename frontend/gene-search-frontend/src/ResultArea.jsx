@@ -1,26 +1,31 @@
 
-function GeneInfo({search_result}){
+function GeneInfo({search_result_list}){
     let table_content;
-    if (search_result){
+    console.log(search_result_list)
+    if (search_result_list.length>0){
         table_content = (
             <>
                 <div className="border-b-2 py-2 flex items-center justify-center">
-                    Gene {search_result.Gene_Name} information
+                    Gene information
                 </div>
                 <div>
                     <div className="border-b-2">Gene Information</div>
-                    <div className="py-2 text-xs border-stone-500 grid gap-2 grid-flow-col grid-rows-5 grid-cols-2 sm:grid-rows-2 sm:grid-cols-5 sm:grid-flow-row sm:text-xs md:text-base lg:text-xl">
-                        <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">Gene WormBase ID</div>
-                        <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">Status</div>
-                        <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">Gene Sequence Name</div>
-                        <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">Gene Name</div>
-                        <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">Other Name</div>
-                        <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Gene_ID}</div>
-                        <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Status}</div>
-                        <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Sequence_Name}</div>
-                        <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Gene_Name}</div>
-                        <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Other_Name}</div>
-                    </div>
+                    {search_result_list.map((search_result,id)=>{
+                        return(
+                            <div key={id} className="py-2 text-xs border-stone-500 grid gap-2 grid-flow-col grid-rows-5 grid-cols-2 sm:grid-rows-2 sm:grid-cols-[repeat(5,_auto)] sm:grid-flow-row sm:text-xs md:text-base lg:text-xl">
+                                <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">Gene WormBase ID</div>
+                                <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">Status</div>
+                                <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">Gene Sequence Name</div>
+                                <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">Gene Name</div>
+                                <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">Other Name</div>
+                                <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Gene_ID}</div>
+                                <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Status}</div>
+                                <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Sequence_Name}</div>
+                                <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Gene_Name}</div>
+                                <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Other_Name}</div>
+                            </div>  
+                        )
+                    })}
                 </div>
             </>
         )
