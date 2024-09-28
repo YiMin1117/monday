@@ -30,11 +30,11 @@ function GeneInfo({search_result,search_input}) {
                 break
             }
         }
-        console.log(input_type)
+        //console.log(search_result.Gene_Name)
         table_content = (
             <>
-                <div className="border-b-2 py-2 flex items-center justify-center">
-                    Gene information
+                <div className="border-b-2 py-2 flex items-center justify-center text-2xl">
+                    Gene {search_result.Gene_Name}  information
                 </div>
                 <div>
                     <div className="border-b-2">Gene Information</div>
@@ -49,7 +49,14 @@ function GeneInfo({search_result,search_input}) {
                         <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Sequence_Name}</div>
                         <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Gene_Name}</div>
                         <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Other_Name}</div>
-                    </div>  
+                    </div> 
+                    <div className="py-2 text-xs border-stone-500 grid gap-2 grid-flow-col grid-rows-2 grid-cols-2 sm:grid-rows-2 sm:grid-cols-[repeat(2,_auto)] sm:grid-flow-row sm:text-xs md:text-base lg:text-xl">
+                        <div className={(input_type=="Transcript_Name"? "bg-lime-300":"bg-neutral-300")+ " hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5"}>RNA Name</div>
+                        <div className={(input_type=="Type"? "bg-lime-300":"bg-neutral-300")+ " hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5"}>RNA Type</div>
+                        <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Transcript_Name}</div>
+                        <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Type}</div>
+
+                    </div> 
                 </div>
             </>
         )

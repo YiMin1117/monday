@@ -60,8 +60,8 @@ export function SearchArea({search_input, setSearchInput, setSearchResult}) {
     };
 
     return (
-        <div className="my-1 border border-stone-500 rounded-md p-2 shadow-md bg-white grid gap-1 grid-cols-1 sm:grid-cols-2 text-center">
-            <div>請輸入類型 (目前沒效果)</div>
+        <div className="my-1 border border-stone-500 rounded-md p-2 shadow-md bg-white grid gap-1 grid-cols-1 sm:grid-cols-2 text-center text-xl">
+            <div >請輸入類型 (目前沒效果)</div>
             <div className="flex justify-around">
                 <label className="rounded-2xl p-1 hover:bg-stone-300 active:bg-stone-500">
                     <input type="radio" checked={search_input.searchBy === "target"} 
@@ -81,11 +81,16 @@ export function SearchArea({search_input, setSearchInput, setSearchResult}) {
             <input type="text" className="border rounded-sm hover:bg-neutral-200"
                 value={search_input.search_term}
                 onChange={e => {
-                    setSearchInput({...search_input, search_term: e.target.value})
+                    setSearchInput({...search_input, search_term: e.target.value.trim()})
                 }}
             />
             <button onClick={getGene}
-                className="my-1 mx-auto w-3/4 rounded-md border border-lime-50 bg-lime-300 hover:bg-lime-400 active:bg-lime-500 sm:col-span-2"
+                className={`my-1 mx-auto w-3/4 rounded-md border border-lime-50 ${
+                    search_input.search_term
+                    ? "bg-lime-300 hover:bg-lime-400 active:bg-lime-500"
+                    : "bg-gray-300 cursor-not-allowed"
+                } sm:col-span-2`}                
+                disabled={!search_input.search_term} 
             >
                 Search!
             </button>
