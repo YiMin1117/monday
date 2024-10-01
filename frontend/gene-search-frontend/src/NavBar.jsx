@@ -3,7 +3,7 @@ import React from 'react';
 
 export function NavBar() {
     return (
-        <nav className="bg-teal-900 w-full left-0 fixed top-0 z-50">
+        <nav className="bg-teal-900 w-full left-0 fixed top-0 z-50 ">
             <div className="w-full px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
                 <div className="text-white text-2xl font-bold">
                     YIMIN_Gene_Search

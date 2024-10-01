@@ -11,4 +11,11 @@ export default defineConfig({
     react(),
     eslint(),
   ],
+  build:{
+    rollupOptions:{
+      output:{
+        
+      }
+    }
+  }
 })

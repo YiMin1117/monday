@@ -20,5 +20,6 @@ from search import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('search/', include('search.urls')),  # 更新路由
+    path('search/', include('search.urls')),
+    path('finance/', include('finance.urls'))  # 更新路由
 ]
