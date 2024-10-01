@@ -52,17 +52,22 @@ const  FinancePage= ()=>{
           windowSize,
         },
       });
-  
-      const stock1Data = response.data.stock1.map((point) => [
+      
+      let stock1Data, stock2Data, spreadData;
+      let dataLength;
+      let movingAvgData, stdDevData, upperBand, lowerBand;
+
+      stock1Data = response.data.stock1.map((point) => [
         new Date(point.Date).getTime(), // 將日期轉換為毫秒時間戳
         Math.log(point.Close),                     // 股票收盤價
       ]);
   
-      const stock2Data = response.data.stock2.map((point) => [
+      stock2Data = response.data.stock2.map((point) => [
         new Date(point.Date).getTime(), 
         Math.log(point.Close),
       ]);
-      const spreadData = stock1Data.map((stock1point, index) => {
+
+      spreadData = stock1Data.map((stock1point, index) => {
         const timestamp = stock1point[0];
         if (!stock2Data[index] || stock2Data[index][0] !== timestamp) {
           console.error(`Error: stock2Data at index ${index} is missing or timestamp mismatch`);
@@ -73,88 +78,141 @@ const  FinancePage= ()=>{
         const spread = stock1LogClose - stock2LogClose;
         return [timestamp, spread];
       });
-      console.log(spreadData)
+      dataLength = spreadData.length;
       // 計算移動平均
-      const movingAvgData = calculateMovingAverage(spreadData, windowSize);
-
+      movingAvgData = calculateMovingAverage(spreadData, windowSize);
       // 計算標準差
-      const stdDevData = calculateStandardDeviation(spreadData, movingAvgData, windowSize);
-      
+      stdDevData = calculateStandardDeviation(spreadData, movingAvgData, windowSize);
       // 計算正負標準差線
-      const upperBand = stdDevData.map((point, index) => {
+      upperBand = stdDevData.map((point, index) => {
         if (point[1] === null) return [point[0], null];
         return [point[0], movingAvgData[index][1] + point[1] * nStd]; // 上標準差
       });
-
-      const lowerBand = stdDevData.map((point, index) => {
+      lowerBand = stdDevData.map((point, index) => {
         if (point[1] === null) return [point[0], null];
         return [point[0], movingAvgData[index][1] - point[1] * nStd]; // 下標準差
       });
 
 
+      function pushSeriesData (timestamp, lastTrade, index, hasMarker){
+        let oneStock1Data = {
+          x:timestamp,
+          y:stock1Data[index][1],
+        }
+        let oneStock2Data = {
+          x:timestamp,
+          y:stock2Data[index][1],
+        }
+        let oneSpreadData = {
+          x:timestamp,
+          y:spreadData[index][1]
+        }
+        if (hasMarker){
+          oneStock1Data.marker = {
+            enabled:true,
+            symbol: lastTrade === SELLSTOCK1 ? 'triangle-down' :'triangle-up',
+            fillColor: lastTrade === SELLSTOCK1 ?'red':'green',
+            lineColor: lastTrade === SELLSTOCK1 ?'red':'green',
+            lineWidth: 2,
+            radius: 6,
+          }
+          oneStock2Data.marker = {
+            enabled:true,
+            symbol: lastTrade === SELLSTOCK2 ? 'triangle-down' :'triangle-up',
+            fillColor: lastTrade === SELLSTOCK2 ?'red':'green',
+            lineColor: lastTrade === SELLSTOCK2 ?'red':'green',
+            lineWidth: 2,
+            radius: 6,
+          }
+          oneSpreadData.marker = {
+            enabled:true,
+            symbol: lastTrade === SELLSTOCK1 ? 'triangle-down' :'triangle-up',
+            fillColor: lastTrade === SELLSTOCK1 ?'red':'green',
+            lineColor: lastTrade === SELLSTOCK1 ?'red':'green',
+            lineWidth: 2,
+            radius: 6,
+          }
+        }
+        stock1SeriesData.push(oneStock1Data)
+        stock2SeriesData.push(oneStock2Data)
+        spreadSeriesData.push(oneSpreadData)
+      }
+
+
       let opentrade = false;  // true 代表open
       let lastTrade ;
-      const marker = [[],[],[]];    // 儲存所有標記的交易點
-      const sellmark1 = 'a';
-      const sellmark2 = 'b';
-      function pushMarkers (marker,timestamp,lastTrade,index){
-        marker[0].push({
-           
-            symbol: lastTrade === sellmark1 ? 'triangle-down' :'triangle-up',
-            fillColor: lastTrade === sellmark1 ?'red':'green',
-            lineColor: lastTrade === sellmark1 ?'red':'green',
-            lineWidth: 2,
-            radius: 6,
-          
-         
-        })
-        marker[1].push({
-         
-            symbol: lastTrade === sellmark2 ? 'triangle-down' :'triangle-up',
-            fillColor: lastTrade === sellmark2 ?'red':'green',
-            lineColor: lastTrade === sellmark2 ?'red':'green',
-            lineWidth: 2,
-            radius: 6,
-          
-          
-        })
-        marker[2].push({
-          
-            symbol: lastTrade === sellmark1 ? 'triangle-down' :'triangle-up',
-            fillColor: lastTrade === sellmark1 ?'red':'green',
-            lineColor: lastTrade === sellmark1 ?'red':'green',
-            lineWidth: 2,
-            radius: 6,
-         
-        })
-      }
-      // 遍歷 spread 數據並標記交易點
-      spreadData.forEach((point, index) => {
-        const timestamp = point[0];
-        const spreadValue = point[1];
-        const upperBandValue = upperBand[index] ? upperBand[index][1] : null;
-        const lowerBandValue = lowerBand[index] ? lowerBand[index][1] : null;
-        const movingAvgValue = movingAvgData[index] ? movingAvgData[index][1] : null;
+      let stock1SeriesData = [], stock2SeriesData = [], spreadSeriesData = [];
+      const SELLSTOCK1 = 'a', SELLSTOCK2 = 'b';
+      let previousSign = null, currentSign;
+      for (let index = 0; index < dataLength; index++) {
+        let TRADETYPE = lastTrade;
+        let hasMarker = false;
+        const [timestamp, spreadValue] = spreadData[index];
+        const upperBandValue = upperBand[index][1];
+        const lowerBandValue = lowerBand[index][1];
+        const movingAvgValue = movingAvgData[index][1];
         
-        if ((spreadValue >= upperBandValue) && !opentrade) {
-          lastTrade=sellmark1
-          // 觸碰上標準差，
-          pushMarkers(marker,timestamp,sellmark1,index)
-          opentrade = true
-
-        } else if ((spreadValue <= lowerBandValue) && !opentrade ) {
-          lastTrade=sellmark2
-          // 觸碰下標準差，
-          pushMarkers(marker,timestamp,sellmark2,index)
-          opentrade = true
-        } else if ((spreadValue === movingAvgValue) && opentrade) {
-          // 碰到移動平均，反向操作並關倉
-          opentrade = false
-          pushMarkers(marker,timestamp,lastTrade === sellmark1?sellmark2:sellmark1,index)
-          console.log('碰到了中現')
-  
+        if (upperBandValue === null){
+          pushSeriesData(timestamp, "", index, false)
+          continue;
         }
-      });
+        if ((spreadValue >= upperBandValue) && !opentrade) {
+          lastTrade = SELLSTOCK1
+          TRADETYPE = lastTrade
+          opentrade = true
+          hasMarker = true
+          console.log(spreadValue, "開倉賣 1")
+          // 觸碰上標準差，
+        } else if ((spreadValue <= lowerBandValue) && !opentrade ) {
+          lastTrade = SELLSTOCK2
+          TRADETYPE = lastTrade
+          opentrade = true
+          hasMarker = true
+          console.log(spreadValue, "開倉賣 2")
+          // 觸碰下標準差，
+        } else{
+          currentSign = (spreadValue - movingAvgValue) > 0 ? '+' : '-';
+          hasMarker = false;
+          if (previousSign !== currentSign){
+            previousSign = currentSign
+            if (opentrade){
+              opentrade = false
+              TRADETYPE = lastTrade === SELLSTOCK1 ? SELLSTOCK2 : SELLSTOCK1;
+              hasMarker = true
+              console.log(spreadValue, "關倉!")
+            }
+          }
+        }
+        pushSeriesData(timestamp, TRADETYPE, index, hasMarker)
+      }
+      
+      // 遍歷 spread 數據並標記交易點
+      // spreadData.forEach((point, index) => {
+      //   const timestamp = point[0];
+      //   const spreadValue = point[1];
+      //   const upperBandValue = upperBand[index] ? upperBand[index][1] : null;
+      //   const lowerBandValue = lowerBand[index] ? lowerBand[index][1] : null;
+      //   const movingAvgValue = movingAvgData[index] ? movingAvgData[index][1] : null;
+        
+      //   if ((spreadValue >= upperBandValue) && !opentrade) {
+      //     lastTrade=sellmark1
+      //     // 觸碰上標準差，
+      //     pushMarkers(marker,timestamp,sellmark1,index)
+      //     opentrade = true
+
+      //   } else if ((spreadValue <= lowerBandValue) && !opentrade ) {
+      //     lastTrade=sellmark2
+      //     // 觸碰下標準差，
+      //     pushMarkers(marker,timestamp,sellmark2,index)
+      //     opentrade = true
+      //   } else if ((spreadValue === movingAvgValue) && opentrade) {
+      //     // 碰到移動平均，反向操作並關倉
+      //     opentrade = false
+      //     pushMarkers(marker,timestamp,lastTrade === sellmark1?sellmark2:sellmark1,index)
+      //     console.log('碰到了中現')
+  
+      //   }
+      // });
 
       // 設置 Highcharts 圖表選項，顯示股票數據
       setChartOptions({
@@ -165,14 +223,12 @@ const  FinancePage= ()=>{
         series: [
           {
             name: stock1,
-            data: stock1Data,  // 來自 API 的 stock1 數據
-            marker:marker[0],
+            data: stock1SeriesData,  // 來自 API 的 stock1 數據
             tooltip: { valueDecimals: 2 },
           },
           {
             name: stock2,
-            data: stock2Data,  // 來自 API 的 stock2 數據
-            marker:marker[1],
+            data: stock2SeriesData,  // 來自 API 的 stock2 數據
             tooltip: { valueDecimals: 2 },
           },
         ],
@@ -187,29 +243,20 @@ const  FinancePage= ()=>{
         yAxis: { title: { text: 'Spread (對數差值)' } },  // 表示 spread 的 Y 軸
         series: [
           {
-            name: 'Trade Markers',
-            type: 'scatter',  // 作為散點圖顯示買賣信號
-            data: spreadData,
-            marker:marker[2],  
-            tooltip: {
-              pointFormat: '{point.name}: {point.y:.4f}',
-            },
-          },
-          {
             name: 'Spread (對數差值)',
-            data: spreadData,  // 計算得到的 spread 數據
-            tooltip: { valueDecimals: 4 },
+            data: spreadSeriesData,  // 計算得到的 spread 數據
+            tooltip: { valueDecimals: 8 },
           },
           {
             name: '移動平均',
             data: movingAvgData,
-            tooltip: { valueDecimals: 4 },
+            tooltip: { valueDecimals: 8 },
             color: 'blue',
           },
           {
             name: `+${nStd} 標準差`,
             data: upperBand,
-            tooltip: { valueDecimals: 4 },
+            tooltip: { valueDecimals: 8 },
             color: 'red',
             dashStyle: 'Dash', // 使用虛線顯示
           },
