@@ -126,6 +126,7 @@ export function BrowseSearchArea({browseBy,rnaTypes,setBrowseBy,setRnaTypes,data
 
   );
 }
+//to do input value
 const BrowseBy = ({ browseBy, handleBrowseByChange }) => {
     return (
     <div className="flex space-x-10">
@@ -153,41 +154,42 @@ const BrowseBy = ({ browseBy, handleBrowseByChange }) => {
     </div>
     );
   };
-  const RNATypeCheckboxes = ({ rnaTypes, handleCheckboxChange }) => {
-    return (
-    <div className="mt-4">
-        <input
-          type="checkbox"
-          id="mrna"
-          checked={rnaTypes.mrna}
-          onChange={() => handleCheckboxChange('mrna')}
-        />
-        <label htmlFor="mrna" className="ml-2">mRNA</label>
+
+const RNATypeCheckboxes = ({ rnaTypes, handleCheckboxChange }) => {
+  return (
+  <div className="mt-4">
+      <input
+        type="checkbox"
+        id="mrna"
+        checked={rnaTypes.mrna}
+        onChange={() => handleCheckboxChange('mrna')}
+      />
+      <label htmlFor="mrna" className="ml-2">mRNA</label>
+
+      <div className="mt-4 ml-6">
+          <label className="font-bold">Non Coding RNA</label>
+          <div className="ml-4">
+              <input
+              type="checkbox"
+              checked={rnaTypes.nonCodingRNA.selectAll}
+              onChange={() => handleCheckboxChange('nonCodingRNA', 'selectAll')}
+              />
+              <label className="ml-2">Select All</label>
   
-        <div className="mt-4 ml-6">
-            <label className="font-bold">Non Coding RNA</label>
-            <div className="ml-4">
-                <input
-                type="checkbox"
-                checked={rnaTypes.nonCodingRNA.selectAll}
-                onChange={() => handleCheckboxChange('nonCodingRNA', 'selectAll')}
-                />
-                <label className="ml-2">Select All</label>
-    
-                <div className="grid grid-cols-2 mt-2">
-                {Object.keys(rnaTypes.nonCodingRNA.types).map((type) => (
-                    <div key={type}>
-                    <input
-                        type="checkbox"
-                        checked={rnaTypes.nonCodingRNA.types[type]}
-                        onChange={() => handleCheckboxChange('nonCodingRNA', type)}
-                    />
-                    <label className="ml-2">{type}</label>
-                    </div>
-                ))}
-                </div>
-            </div>
-        </div>
-    </div>
-    );
-  };
+              <div className="grid grid-cols-2 mt-2">
+              {Object.keys(rnaTypes.nonCodingRNA.types).map((type) => (
+                  <div key={type}>
+                  <input
+                      type="checkbox"
+                      checked={rnaTypes.nonCodingRNA.types[type]}
+                      onChange={() => handleCheckboxChange('nonCodingRNA', type)}
+                  />
+                  <label className="ml-2">{type}</label>
+                  </div>
+              ))}
+              </div>
+          </div>
+      </div>
+  </div>
+  );
+};
