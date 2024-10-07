@@ -1,8 +1,9 @@
 from django.http import JsonResponse, HttpRequest, HttpResponse
 from django.db.models import Q
 from .models import BigTableV2  # 將模型替換為 BigTableV2
-
+from .utils.trans_crawler import crawler
 import json
+
 
 def getJSON(request:HttpRequest):
     body_unicode = request.body.decode('utf-8')
@@ -131,3 +132,41 @@ def get_gene_by_type(request):
         }
 
     return JsonResponse(response)
+def get_transcript_data(request):
+    if request.method == 'POST':
+        # 從請求中獲取 transcript_name
+        try:
+            data = json.loads(request.body)  # 解析 JSON 數據
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        
+        try:
+            transcript_name = data.get('transcript_name', '')
+            print(f"Fetching data for transcript: {transcript_name}")
+            
+            # 調用 crawler 函數來獲取 spliced_df, spliced_sequence 等數據
+            spliced_df, spliced_sequence, unspliced_df, unspliced_sequence, protein_str = crawler(transcript_name)
+            
+            # 如果沒有抓到 spliced/unspliced data，返回空數組
+            spliced_data = spliced_df.to_dict(orient='records') if not spliced_df.empty else []
+            unspliced_data = unspliced_df.to_dict(orient='records') if not unspliced_df.empty else []
+
+            # 如果沒有抓到序列，返回空字串
+            spliced_sequence = spliced_sequence if spliced_sequence else ""
+            unspliced_sequence = unspliced_sequence if unspliced_sequence else ""
+            protein_data = protein_str if protein_str else ""
+
+            response = {
+            'spliced_data': spliced_data,
+            'spliced_sequence': spliced_sequence,
+            'unspliced_data': unspliced_data,
+            'unspliced_sequence': unspliced_sequence,
+            'protein_data': protein_data,
+            'message': 'Data fetched successfully' if spliced_data or unspliced_data else 'No data found'
+            }
+            
+            return JsonResponse(response)
+
+        # 假如你需要處理其他異常，例如數據庫查詢異常
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)

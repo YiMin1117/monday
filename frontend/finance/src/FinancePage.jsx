@@ -6,7 +6,9 @@ import axios from 'axios';
 const  FinancePage= ()=>{
   const [chartOptions, setChartOptions] = useState(null);
   const [chartOptionsForSpread, setChartOptionsForSpread] = useState(null);
-
+  const [tradeHistory, setTradeHistory] = useState([]); // 保存交易历史记录
+  const [dailyProfitLoss, setDailyProfitLoss] = useState([]);
+  
   const calculateMovingAverage = (data, windowSize) => {
     // 0: (2) [1609689600000, -0.3428325549615625]
     // 1: (2) [1609776000000, -0.3335018769493088]...
@@ -93,7 +95,66 @@ const  FinancePage= ()=>{
         return [point[0], movingAvgData[index][1] - point[1] * nStd]; // 下標準差
       });
 
-
+      const calculateProfitLoss = (tradeHistory, stock1Data, stock2Data) => {
+        let initialAmount = 10000; // 初始金额
+        let investedAmount = initialAmount / 2; // 每只股票投资金额为 5000
+        let stock1Quantity = 0;
+        let stock2Quantity = 0;
+        let cumulativeProfitLoss = 0;
+        let dailyProfitLoss = [];
+        let isTradeOpen = false;
+        let entryDate;
+      
+        // 使用 for 循环遍历 tradeHistory 来确定开仓和关仓时间点
+        for (let tradeIndex = 0; tradeIndex < tradeHistory.length; tradeIndex++) {
+          const trade = tradeHistory[tradeIndex];
+          const entryPriceStock1 = trade.stock1Price;
+          const entryPriceStock2 = trade.stock2Price;
+      
+          if (trade.type === 'Open') {
+            stock1Quantity = Math.floor(investedAmount / entryPriceStock1);
+            stock2Quantity = Math.floor(investedAmount / entryPriceStock2);
+            isTradeOpen = true;
+            entryDate = new Date(trade.date); // 记录开仓日期
+          }
+      
+          // 使用 for 循环遍历每日数据，仅在开仓后的日期内计算损益
+          if (isTradeOpen) {
+            for (let i = 0; i < stock1Data.length; i++) {
+              const [timestamp, stock1ClosePrice] = stock1Data[i];
+              const stock2ClosePrice = stock2Data[i][1];
+              const currentDate = new Date(timestamp);
+      
+              // 确保仅从开仓后的第二天开始计算损益
+              if (currentDate > entryDate) {
+                // 计算当日损益，卖出股票用负号，买入股票用正号
+                const profitLoss = -(stock1Quantity * stock1ClosePrice) + (stock2Quantity * stock2ClosePrice);
+                cumulativeProfitLoss += profitLoss;
+                const percentageChange = ((initialAmount + cumulativeProfitLoss) / initialAmount) * 100;
+      
+                dailyProfitLoss.push({
+                  date: currentDate.toISOString().split('T')[0],
+                  profitLoss: profitLoss.toFixed(2),
+                  percentageChange: percentageChange.toFixed(2) + '%',
+                });
+      
+                // 如果当前日期是关仓日期，则停止计算
+                if (trade.type === 'Close' && trade.date === currentDate.toISOString().split('T')[0]) {
+                  console.log('hello')
+                  isTradeOpen = false;
+                  break; // 立即跳出循环，停止计算损益
+                }
+              }
+            }
+          }
+        }
+      
+        return dailyProfitLoss;
+      };
+      
+      
+      
+      
       function pushSeriesData (timestamp, lastTrade, index, hasMarker){
         let oneStock1Data = {
           x:timestamp,
@@ -110,7 +171,7 @@ const  FinancePage= ()=>{
         if (hasMarker){
           oneStock1Data.marker = {
             enabled:true,
-            symbol: lastTrade === SELLSTOCK1 ? 'triangle-down' :'triangle-up',
+            symbol: lastTrade === SELLSTOCK1 ? 'triangle-down' :'triangle',
             fillColor: lastTrade === SELLSTOCK1 ?'red':'green',
             lineColor: lastTrade === SELLSTOCK1 ?'red':'green',
             lineWidth: 2,
@@ -118,7 +179,7 @@ const  FinancePage= ()=>{
           }
           oneStock2Data.marker = {
             enabled:true,
-            symbol: lastTrade === SELLSTOCK2 ? 'triangle-down' :'triangle-up',
+            symbol: lastTrade === SELLSTOCK2 ? 'triangle-down' :'triangle',
             fillColor: lastTrade === SELLSTOCK2 ?'red':'green',
             lineColor: lastTrade === SELLSTOCK2 ?'red':'green',
             lineWidth: 2,
@@ -126,7 +187,7 @@ const  FinancePage= ()=>{
           }
           oneSpreadData.marker = {
             enabled:true,
-            symbol: lastTrade === SELLSTOCK1 ? 'triangle-down' :'triangle-up',
+            symbol: lastTrade === SELLSTOCK1 ? 'triangle-down' :'triangle',
             fillColor: lastTrade === SELLSTOCK1 ?'red':'green',
             lineColor: lastTrade === SELLSTOCK1 ?'red':'green',
             lineWidth: 2,
@@ -144,6 +205,8 @@ const  FinancePage= ()=>{
       let stock1SeriesData = [], stock2SeriesData = [], spreadSeriesData = [];
       const SELLSTOCK1 = 'a', SELLSTOCK2 = 'b';
       let previousSign = null, currentSign;
+      let tradeHistory = [];  // 用于存储交易历史记录
+
       for (let index = 0; index < dataLength; index++) {
         let TRADETYPE = lastTrade;
         let hasMarker = false;
@@ -163,6 +226,15 @@ const  FinancePage= ()=>{
           hasMarker = true
           console.log(spreadValue, "開倉賣 1")
           // 觸碰上標準差，
+          // 记录交易数据
+          tradeHistory.push({
+            date: new Date(timestamp).toISOString().split('T')[0],
+            type: 'Open',
+            stock1Action: 'SELL',
+            stock1Price: Math.exp(stock1Data[index][1]).toFixed(2),
+            stock2Action: 'BUY',
+            stock2Price: Math.exp(stock2Data[index][1]).toFixed(2),
+          });
         } else if ((spreadValue <= lowerBandValue) && !opentrade ) {
           lastTrade = SELLSTOCK2
           TRADETYPE = lastTrade
@@ -170,6 +242,15 @@ const  FinancePage= ()=>{
           hasMarker = true
           console.log(spreadValue, "開倉賣 2")
           // 觸碰下標準差，
+          // 记录交易数据
+          tradeHistory.push({
+            date: new Date(timestamp).toISOString().split('T')[0],
+            type: 'Open',
+            stock1Action: 'BUY',
+            stock1Price: Math.exp(stock1Data[index][1]).toFixed(2),
+            stock2Action: 'SELL',
+            stock2Price: Math.exp(stock2Data[index][1]).toFixed(2),
+          });
         } else{
           currentSign = (spreadValue - movingAvgValue) > 0 ? '+' : '-';
           hasMarker = false;
@@ -180,41 +261,28 @@ const  FinancePage= ()=>{
               TRADETYPE = lastTrade === SELLSTOCK1 ? SELLSTOCK2 : SELLSTOCK1;
               hasMarker = true
               console.log(spreadValue, "關倉!")
+              // 记录关仓交易数据
+              tradeHistory.push({
+                date: new Date(timestamp).toISOString().split('T')[0],
+                type: 'Close',
+                stock1Action: lastTrade === SELLSTOCK1 ? 'BUY' : 'SELL',
+                stock1Price: Math.exp(stock1Data[index][1]).toFixed(2),
+                stock2Action: lastTrade === SELLSTOCK1 ? 'SELL' : 'BUY',
+                stock2Price: Math.exp(stock2Data[index][1]).toFixed(2),
+              });
             }
           }
         }
         pushSeriesData(timestamp, TRADETYPE, index, hasMarker)
       }
-      
-      // 遍歷 spread 數據並標記交易點
-      // spreadData.forEach((point, index) => {
-      //   const timestamp = point[0];
-      //   const spreadValue = point[1];
-      //   const upperBandValue = upperBand[index] ? upperBand[index][1] : null;
-      //   const lowerBandValue = lowerBand[index] ? lowerBand[index][1] : null;
-      //   const movingAvgValue = movingAvgData[index] ? movingAvgData[index][1] : null;
-        
-      //   if ((spreadValue >= upperBandValue) && !opentrade) {
-      //     lastTrade=sellmark1
-      //     // 觸碰上標準差，
-      //     pushMarkers(marker,timestamp,sellmark1,index)
-      //     opentrade = true
 
-      //   } else if ((spreadValue <= lowerBandValue) && !opentrade ) {
-      //     lastTrade=sellmark2
-      //     // 觸碰下標準差，
-      //     pushMarkers(marker,timestamp,sellmark2,index)
-      //     opentrade = true
-      //   } else if ((spreadValue === movingAvgValue) && opentrade) {
-      //     // 碰到移動平均，反向操作並關倉
-      //     opentrade = false
-      //     pushMarkers(marker,timestamp,lastTrade === sellmark1?sellmark2:sellmark1,index)
-      //     console.log('碰到了中現')
-  
-      //   }
-      // });
+      setTradeHistory(tradeHistory);
+      console.log(tradeHistory)
+      // 计算每日的损益
+      const dailyProfitLoss = calculateProfitLoss(tradeHistory, stock1Data, stock2Data);
+      setDailyProfitLoss(dailyProfitLoss); // 保存每日损益数据到状态
+      console.log(dailyProfitLoss)
 
-      // 設置 Highcharts 圖表選項，顯示股票數據
       setChartOptions({
         rangeSelector: { selected: 1 },
         title: { text: `${stock1} vs ${stock2} 股票比較` },
@@ -234,7 +302,7 @@ const  FinancePage= ()=>{
         ],
         
       });
-      console.log(chartOptions)
+      //console.log(chartOptions)
       
       setChartOptionsForSpread({
         rangeSelector: { selected: 1 },
@@ -279,7 +347,7 @@ const  FinancePage= ()=>{
   return (
     <div>
       <SearchArea onSearch={handleSearch} />
-      <ResultArea chartOptions={chartOptions} chartOptionsForSpread={chartOptionsForSpread} />
+      <ResultArea chartOptions={chartOptions} chartOptionsForSpread={chartOptionsForSpread} tradeHistory={tradeHistory}/>
     </div>
   );
 };

@@ -1,26 +1,32 @@
 import React from 'react';
 import Highcharts from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
+import TradeHistoryTable from './TradeHistoryTable';
 
-const ResultArea = ({ chartOptions, chartOptionsForSpread }) => {
+const ResultArea = ({ chartOptions, chartOptionsForSpread,tradeHistory }) => {
   return (
-    <div>
-      <div>
-        {chartOptions ? (
-          <HighchartsReact highcharts={Highcharts} constructorType={'stockChart'} options={chartOptions} />
-        ) : (
-          <p>請輸入參數後查看股票對數價格圖表</p>
-        )}
-      </div>
-      
-      <div>
-        {chartOptionsForSpread ? (
-          <HighchartsReact highcharts={Highcharts} constructorType={'stockChart'} options={chartOptionsForSpread} />
-        ) : (
-          <p>請輸入參數後查看Spread圖表</p>
-        )}
-      </div>
+  <div className="flex flex-wrap justify-center gap-4 p-4 bg-gray-100">
+    <div className="bg-white shadow-lg rounded-lg p-4 w-full lg:w-4/5">
+      {chartOptions ? (
+        <HighchartsReact highcharts={Highcharts} constructorType={'stockChart'} options={chartOptions} />
+      ) : (
+        <p>請輸入參數後查看股票對數價格圖表</p>
+      )}
     </div>
+
+    <div className="bg-white shadow-lg rounded-lg p-4 w-full lg:w-4/5">
+      {chartOptionsForSpread ? (
+        <HighchartsReact highcharts={Highcharts} constructorType={'stockChart'} options={chartOptionsForSpread} />
+      ) : (
+        <p>請輸入參數後查看Spread圖表</p>
+      )}
+    </div>
+    <div className="bg-white shadow-lg rounded-lg p-4 w-full lg:w-4/5">
+      <TradeHistoryTable tradeHistory={tradeHistory} />
+    </div>
+  </div>
+
+
   );
 };
 
