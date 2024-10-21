@@ -53,13 +53,18 @@ function GeneInfo({search_result,search_input}) {
                         <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Gene_Name}</div>
                         <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Other_Name}</div>
                     </div> 
-                    <div className="py-2 text-xs border-stone-500 grid gap-2 grid-flow-col grid-rows-2 grid-cols-2 sm:grid-rows-2 sm:grid-cols-[repeat(2,_auto)] sm:grid-flow-row sm:text-xs md:text-base lg:text-xl">
+                    <div className="py-2 text-xs border-stone-500 grid gap-2 grid-cols-3 grid-rows-2 sm:text-xs md:text-base lg:text-xl">
                         <div className={(input_type=="Transcript_Name"? "bg-lime-300":"bg-neutral-300")+ " hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5"}>RNA Name</div>
                         <div className={(input_type=="Type"? "bg-lime-300":"bg-neutral-300")+ " hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5"}>RNA Type</div>
+                        <div className={(input_type=="Type"? "bg-lime-300":"bg-neutral-300")+ " hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5"}>Show Details</div>
                         <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5 text-blue-600 underline">
                             <Link to={`/transcript/${search_result.Transcript_Name}`}>{search_result.Transcript_Name}</Link></div>
                         <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">{search_result.Type}</div>
-
+                        <div className="bg-neutral-100 hover:bg-neutral-300 rounded flex justify-center items-center text-center p-0.5">
+                            <Link to="/details" state={{ ref_id: search_result.Transcript_Name, type: search_result.Type }} className="w-full h-full flex justify-center items-center">
+                                Show Details
+                            </Link>
+                        </div>
                     </div> 
                 </div>
             </>

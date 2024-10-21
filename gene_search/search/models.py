@@ -34,4 +34,25 @@ class BigTableV2(models.Model):
             "Transcript_Name":self.Transcript_Name,
             "Type":self.Type,
         }
-    
+
+# 針對 bedgraph 文件的模型
+class GeneData(models.Model):
+    init_pos = models.IntegerField()
+    end_pos = models.IntegerField()
+    evenly_rc = models.FloatField()
+    ref_id = models.CharField(max_length=255)
+    source_file = models.CharField(max_length=255)  # 用來標記文件來源
+
+    def __str__(self):
+        return f'{self.ref_id} ({self.init_pos}-{self.end_pos}) from {self.source_file}'
+
+# 針對 spliced_codingtranscript_293.csv 的模型
+class SplicedCodingTranscript(models.Model):
+    name = models.CharField(max_length=255)
+    type = models.CharField(max_length=255)
+    start = models.IntegerField()
+    end = models.IntegerField()
+    length = models.IntegerField()
+
+    def __str__(self):
+        return f'{self.name} ({self.type})'

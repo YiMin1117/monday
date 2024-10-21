@@ -1,8 +1,10 @@
 from django.http import JsonResponse, HttpRequest, HttpResponse
 from django.db.models import Q
-from .models import BigTableV2  # 將模型替換為 BigTableV2
+from .models import BigTableV2,GeneData, SplicedCodingTranscript  # 將模型替換為 BigTableV2
 from .utils.trans_crawler import crawler
 import json
+import os
+
 
 
 def getJSON(request:HttpRequest):
@@ -170,3 +172,45 @@ def get_transcript_data(request):
         # 假如你需要處理其他異常，例如數據庫查詢異常
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+
+def search_ref_id(request):
+    ref_id = request.GET.get('ref_id', None)  # 從 URL 參數中獲取 ref_id
+    if not ref_id:
+        return JsonResponse({'error': 'No ref_id provided'}, status=400)
+    # 完整路徑
+    base_dir = r'C:\Users\jimmy\Desktop\monday\csv\HW4_answer'
+    # 查詢 GeneData 的資料，分別來自 m0, m1, m2
+    gene_data_m0 = GeneData.objects.filter(ref_id=ref_id, source_file=os.path.join(base_dir,'SRR20334757_m0_bedgraph.csv'))
+    gene_data_m1 = GeneData.objects.filter(ref_id=ref_id, source_file=os.path.join(base_dir,'SRR20334757_m1_bedgraph.csv'))
+    gene_data_m2 = GeneData.objects.filter(ref_id=ref_id, source_file=os.path.join(base_dir,'SRR20334757_m2_bedgraph.csv'))
+
+    # 查詢 SplicedCodingTranscript 的資料
+    spliced_info = SplicedCodingTranscript.objects.filter(name=ref_id)
+
+    # 將查詢結果轉換成 JSON 格式
+    def format_gene_data(data):
+        return [{
+            'init_pos': gene.init_pos,
+            'end_pos': gene.end_pos,
+            'evenly_rc': gene.evenly_rc,
+            'ref_id': gene.ref_id,
+        } for gene in data]
+
+    def format_spliced_data(data):
+        return [{
+            'name': transcript.name,
+            'type': transcript.type,
+            'start': transcript.start,
+            'end': transcript.end,
+            'length': transcript.length
+        } for transcript in data]
+
+    # 將資料組織成指定格式
+    response_data = {
+        'm0': format_gene_data(gene_data_m0) if gene_data_m0.exists() else [],
+        'm1': format_gene_data(gene_data_m1) if gene_data_m1.exists() else [],
+        'm2': format_gene_data(gene_data_m2) if gene_data_m2.exists() else [],
+        'spliced_info': format_spliced_data(spliced_info) if spliced_info.exists() else []
+    }
+
+    return JsonResponse(response_data, safe=False)

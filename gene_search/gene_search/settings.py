@@ -38,12 +38,26 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    # 'django.contrib.sites',  # allauth 需要
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "corsheaders", # corsheaders !
-    'search'
+    'corsheaders', # corsheaders !
+    'search',
+    # 'rest_framework',
+    # 'dj_rest_auth',
+    # 'allauth',
+    # 'allauth.account',
+    # 'allauth.socialaccount',  # 如果你想添加社交登入功能
+    # 'dj_rest_auth.registration',  # 用於註冊功能
+   
     
 ]
+# # 認證後端
+# AUTHENTICATION_BACKENDS = [
+#     'django.contrib.auth.backends.ModelBackend',
+#     'allauth.account.auth_backends.AuthenticationBackend',
+# ]
+# SITE_ID = 1#默認
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware", # corsheaders !
