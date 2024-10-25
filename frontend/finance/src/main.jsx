@@ -5,12 +5,16 @@ import './index.css';
 import FinancePage from './hw1_pair/FinancePage.jsx';  // 使用默認導出
 import RsiPage from './hw2_1/RsiPage.jsx';
 import { BackTrader } from './hw2_2/BackTrader.jsx';
-
+import AuthApp from './LoginPage.jsx';
 // 設置路由，根路徑指向 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <FinancePage />,  // 根路徑直接渲染
+    element: <AuthApp />,  // 根路徑渲染登入頁
+  },
+  {
+    path: "finance",
+    element: <FinancePage />,  // 登入後跳轉到的頁面
   },
   {
     path: "rsi",

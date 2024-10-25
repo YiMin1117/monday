@@ -1,11 +1,25 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
+import axios from 'axios';
 
 export function NavBar() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const navigate = useNavigate();
 
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
+    };
+
+    // 登出功能
+    const submitLogout = (e) => {
+        e.preventDefault();
+        axios.post("http://127.0.0.1:8000/api/logout", {}, { withCredentials: true })
+            .then((res) => {
+                navigate('/'); // 登出後返回登入頁面
+            })
+            .catch((error) => {
+                console.error("Logout Error:", error);
+            });
     };
 
     return (
@@ -15,7 +29,7 @@ export function NavBar() {
                     YIMIN_finance
                 </div>
                 <div className="hidden md:flex space-x-8 relative">
-                    <Link to="/" className="text-white hover:underline">hw1</Link>
+                    <Link to="/finance" className="text-white hover:underline">hw1</Link>
                     <div className="relative">
                         <button 
                             onClick={toggleDropdown} 
@@ -24,12 +38,18 @@ export function NavBar() {
                             hw2
                         </button>
                         {isDropdownOpen && (
-                            <div className="absolute left-0 mt-2 w-40 bg-white rounded-md shadow-lg py-2 z-10">
+                            <div className="absolute left-0 mt-2 w-32 bg-white rounded-md shadow-lg py-2 z-10 ">
                                 <Link to="/rsi" className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">hw2-1</Link>
                                 <Link to="/backtrader" className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">hw2-2</Link>
                             </div>
                         )}
                     </div>
+                    <button 
+                        onClick={submitLogout} 
+                        className="text-white hover:underline focus:outline-none"
+                    >
+                        Logout
+                    </button>
                 </div>
                 <div className="flex md:hidden">
                     <button type="button" className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">

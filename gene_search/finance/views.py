@@ -15,6 +15,7 @@ from .utils.backtest_strategy import RSIStrategy
 
 
 
+
 def get_stock_data(request):
     stock1 = request.GET.get('stock1')
     stock2 = request.GET.get('stock2')
