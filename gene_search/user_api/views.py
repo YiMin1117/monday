@@ -5,7 +5,13 @@ from rest_framework.response import Response
 from .serializers import UserRegisterSerializer, UserLoginSerializer, UserSerializer
 from rest_framework import permissions, status
 from .validations import custom_validation, validate_email, validate_password
+from django.utils import timezone
+from django.conf import settings
+from django.contrib.sessions.models import Session
+from datetime import timedelta
 
+
+#User = get_user_model()
 
 class UserRegister(APIView):
 	permission_classes = (permissions.AllowAny,)
@@ -49,3 +55,30 @@ class UserView(APIView):
 	def get(self, request):
 		serializer = UserSerializer(request.user)
 		return Response({'user': serializer.data}, status=status.HTTP_200_OK)
+
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+
+class SessionCheckView(APIView):
+    """
+    检查当前会话状态，返回用户是否已验证。
+    """
+    authentication_classes = [SessionAuthentication]  # 使用 SessionAuthentication
+    permission_classes = [IsAuthenticated]  # 仅限已登录用户访问
+    
+    def get(self, request):
+        if request.user.is_authenticated:
+            return Response({"authenticated": True}, status=status.HTTP_200_OK)
+        else:
+            return Response({"authenticated": False}, status=status.HTTP_401_UNAUTHORIZED)
+
+class TokenRefreshView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        request.session.set_expiry(3600)  # 延长会话时间，1小时
+        request.session.modified = True  # 确保 Django 刷新会话
+        return Response({"message": "Session refreshed"})

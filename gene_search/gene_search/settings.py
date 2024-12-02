@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'search',
     'user_api.apps.UserApiConfig',
     'rest_framework',
+    'track',
+    'stock_pricising',
     # 'dj_rest_auth',
     # 'allauth',
     # 'allauth.account',
@@ -80,9 +82,9 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-# CSRF_TRUSTED_ORIGINS = [
-#     "http://localhost:5173",
-# ]
+# settings.py
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:5173', 'http://localhost:5174']
+
 
 ROOT_URLCONF = 'gene_search.urls'
 
@@ -171,3 +173,18 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Email Backend 設定
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # 使用 SMTP 發送郵件
+EMAIL_HOST = 'smtp.gmail.com'  # 郵件服務器主機名
+EMAIL_PORT = 587  # 郵件服務器端口
+EMAIL_USE_TLS = True  # 啟用 TLS 加密
+EMAIL_USE_SSL = False  # 禁用 SSL 加密（與 TLS 互斥）
+
+# 發件人郵箱和密碼
+EMAIL_HOST_USER = '268473951rangers@gmail.com'  # 替換為您的 Gmail 郵箱地址
+EMAIL_HOST_PASSWORD = 'zdtv riyl njkf dhsv'  # 替換為您的 Gmail 密碼或應用專用密碼
+
+# 預設發件人
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+

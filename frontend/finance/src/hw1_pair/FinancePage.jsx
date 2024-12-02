@@ -11,6 +11,7 @@ const  FinancePage= ()=>{
   const [tradeHistory, setTradeHistory] = useState([]); // 保存交易历史记录
   const [dailyProfitLoss, setDailyProfitLoss] = useState([]);
   const [tradeDetails,setTradeDetails]=useState([])
+  const [filename, setFilename] = useState(''); // 定義 filename 狀態
   
   const calculateMovingAverage = (data, windowSize) => {
     // 0: (2) [1609689600000, -0.3428325549615625]
@@ -407,11 +408,39 @@ const  FinancePage= ()=>{
       // 你可以在這裡設置錯誤處理邏輯，告訴用戶請求失敗
     }
   };
+  const handleAddTrack = async (formData) => {
+    const { stock1, stock2, startDate, endDate, nStd, windowSize } = formData;
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/track/add_track/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          stock1,
+          stock2,
+          start_date: startDate.toISOString().split('T')[0],
+          end_date: endDate.toISOString().split('T')[0],
+          n_std: nStd,
+          window_size: windowSize,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert('Track added successfully!');
+        setFilename(data.filename); // 保存生成的 JSON 文件名稱
+      } else {
+        alert('Failed to add track.');
+      }
+    } catch (error) {
+      console.error('Error adding track:', error);
+    }
+  };
 
   return (
     <div className="bg-neutral-400 p-5 flex flex-col justify-center pt-16">
       <NavBar></NavBar>
-      <SearchArea onSearch={handleSearch} />
+      <SearchArea onSearch={handleSearch} onAddTrack={handleAddTrack} />
       <ResultArea chartOptions={chartOptions} chartOptionsForSpread={chartOptionsForSpread} tradeHistory={tradeHistory} dailyProfitLoss={dailyProfitLoss} tradeDetails={tradeDetails} />
     </div>
   );

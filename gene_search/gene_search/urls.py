@@ -23,6 +23,8 @@ urlpatterns = [
     path('search/', include('search.urls')),
     path('finance/', include('finance.urls')),  # 更新路由
     path('api/', include('user_api.urls')),
+    path('track/', include('track.urls')),
+    path('stock_pricising/', include('stock_pricising.urls')),
     # path('dj-rest-auth/', include('dj_rest_auth.urls')),  # 登入、登出、密碼重設等
     # path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),  # 註冊
 ]

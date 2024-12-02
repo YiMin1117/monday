@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-const SearchArea =({ onSearch }) =>{
+const SearchArea =({ onSearch, onAddTrack }) =>{
   const [stock1, setStock1] = useState('GLD');
   const [stock2, setStock2] = useState('AAPL');
   const [startDate, setStartDate] = useState(new Date('2021-01-01'));
@@ -14,6 +14,34 @@ const SearchArea =({ onSearch }) =>{
     e.preventDefault();
     onSearch({ stock1, stock2, startDate, endDate, nStd, windowSize });
   
+  };
+  const handleAddTrack = () => {
+    if (validateForm()) {
+      onAddTrack({
+        stock1,
+        stock2,
+        startDate,
+        endDate,
+        nStd: parseFloat(nStd),
+        windowSize: parseInt(windowSize, 10),
+      });
+    }
+  };
+
+  const validateForm = () => {
+    if (!stock1 || !stock2) {
+      alert('請輸入股票代碼');
+      return false;
+    }
+    if (!startDate || !endDate || startDate >= endDate) {
+      alert('請確認日期範圍正確');
+      return false;
+    }
+    if (nStd <= 0 || windowSize <= 0) {
+      alert('n * std 和 Window Size 必須大於 0');
+      return false;
+    }
+    return true;
   };
 
   return (
@@ -88,6 +116,7 @@ const SearchArea =({ onSearch }) =>{
         </button>
         <button
           type="button"
+          onClick={handleAddTrack}
           className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           Add Track

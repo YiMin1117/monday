@@ -1,28 +1,69 @@
+import './axiosSetup'; // 确保拦截器和超时逻辑在项目启动时加载
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
-import FinancePage from './hw1_pair/FinancePage.jsx';  // 使用默認導出
+import FinancePage from './hw1_pair/FinancePage.jsx';
 import RsiPage from './hw2_1/RsiPage.jsx';
 import { BackTrader } from './hw2_2/BackTrader.jsx';
 import AuthApp from './LoginPage.jsx';
-// 設置路由，根路徑指向 
+import ProtectedRoute from './ProtectedRoute';
+import TracklistPage from './hw1_pair/TracklistPage.jsx';
+import HomePage from './hw8/HomePage.jsx';
+import PricingStrategy from './hw8/PricingStrategy.jsx';
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <AuthApp />,  // 根路徑渲染登入頁
+    element: <AuthApp />,
   },
   {
     path: "finance",
-    element: <FinancePage />,  // 登入後跳轉到的頁面
+    element: (
+      //<ProtectedRoute>
+        <FinancePage />
+      //</ProtectedRoute>
+    ),
+  },
+  {
+    path: "tracklist",
+    element: (
+      //<ProtectedRoute>
+        <TracklistPage />
+      //</ProtectedRoute>
+    ),
   },
   {
     path: "rsi",
-    element: <RsiPage />,
+    element: (
+      //<ProtectedRoute>
+        <RsiPage />
+      //</ProtectedRoute>
+    ),
   },
   {
     path: "backtrader",
-    element: <BackTrader />,
+    element: (
+      //<ProtectedRoute>
+        <BackTrader />
+      //</ProtectedRoute>
+    ),
+  },
+  {
+    path: "homepage",
+    element: (
+      //<ProtectedRoute>
+        <HomePage />
+      //</ProtectedRoute>
+    ),
+  },
+  {
+    path: "pricing-strategy",
+    element: (
+      //<ProtectedRoute>
+        <PricingStrategy />
+      //</ProtectedRoute>
+    ),
   },
 ]);
 

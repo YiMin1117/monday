@@ -3,11 +3,20 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 export function NavBar() {
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isHw1DropdownOpen, setIsHw1DropdownOpen] = useState(false);
+    const [isHw2DropdownOpen, setIsHw2DropdownOpen] = useState(false);
     const navigate = useNavigate();
 
-    const toggleDropdown = () => {
-        setIsDropdownOpen(!isDropdownOpen);
+    const toggleHw1Dropdown = () => {
+        setIsHw1DropdownOpen(!isHw1DropdownOpen);
+        // 確保只打開 hw1 的下拉菜單時關閉 hw2
+        if (isHw2DropdownOpen) setIsHw2DropdownOpen(false);
+    };
+
+    const toggleHw2Dropdown = () => {
+        setIsHw2DropdownOpen(!isHw2DropdownOpen);
+        // 確保只打開 hw2 的下拉菜單時關閉 hw1
+        if (isHw1DropdownOpen) setIsHw1DropdownOpen(false);
     };
 
     // 登出功能
@@ -29,20 +38,36 @@ export function NavBar() {
                     YIMIN_finance
                 </div>
                 <div className="hidden md:flex space-x-8 relative">
-                    <Link to="/finance" className="text-white hover:underline">hw1</Link>
                     <div className="relative">
                         <button 
-                            onClick={toggleDropdown} 
+                            onClick={toggleHw1Dropdown} 
+                            className="text-white hover:underline focus:outline-none"
+                        >
+                            hw1
+                        </button>
+                        {isHw1DropdownOpen && (
+                            <div className="absolute left-0 mt-2 w-32 bg-white rounded-md shadow-lg py-2 z-10 ">
+                                <Link to="/finance" className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">hw1-strategy</Link>
+                                <Link to="/tracklist" className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">hw1-tracklist</Link>
+                            </div>
+                        )}
+                    </div>
+                    <div className="relative">
+                        <button 
+                            onClick={toggleHw2Dropdown} 
                             className="text-white hover:underline focus:outline-none"
                         >
                             hw2
                         </button>
-                        {isDropdownOpen && (
+                        {isHw2DropdownOpen && (
                             <div className="absolute left-0 mt-2 w-32 bg-white rounded-md shadow-lg py-2 z-10 ">
                                 <Link to="/rsi" className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">hw2-1</Link>
                                 <Link to="/backtrader" className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">hw2-2</Link>
                             </div>
                         )}
+                    </div>
+                    <div className='relative'>
+                        <Link to="/homepage" className="text-white hover:underline focus:outline-none">hw9</Link>
                     </div>
                     <button 
                         onClick={submitLogout} 

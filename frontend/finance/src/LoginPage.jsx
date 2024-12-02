@@ -2,7 +2,7 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
 import { useState } from 'react';
-import axios from 'axios';
+import axios from './axiosSetup';
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
 import Button from 'react-bootstrap/Button';
@@ -24,6 +24,7 @@ function AuthApp() {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false); // 用于控制按钮禁用状态
   const navigate = useNavigate();
 
 
@@ -34,6 +35,7 @@ function AuthApp() {
 
   function submitRegistration(e) {
     e.preventDefault();
+    setLoading(true);
     client.post(
       "/api/register",
       {
@@ -49,6 +51,7 @@ function AuthApp() {
           password: password
         }
       ).then(() => {
+        setLoading(false);
         navigate('/finance'); // 登入成功後跳轉到主頁面
       });
     });
@@ -56,6 +59,7 @@ function AuthApp() {
 
   function submitLogin(e) {
     e.preventDefault();
+    setLoading(true);
     client.post(
       "api/login",
       {
@@ -63,6 +67,7 @@ function AuthApp() {
         password: password
       }
     ).then(function(res) {
+      setLoading(false);
       navigate('/finance'); // 登入成功後跳轉到主頁面
     })
     .catch(error => console.error("Login Error:", error));
