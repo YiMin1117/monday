@@ -18,6 +18,7 @@ const PricingResultChart = ({ data,formData }) => {
           const response = await axios.get(`http://127.0.0.1:8000/stock_pricising/current_prices/?stock=${stockNameOrId}`);
           setCurrentPrice(response.data.currentPrice); // 更新即時價格
           console.log("現在最新價格",currentPrice)
+          console.log("更新時間",response.data.lastUpdateTime)
         } catch (error) {
           console.error("無法獲取即時價格", error);
         }

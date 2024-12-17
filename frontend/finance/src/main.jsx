@@ -11,6 +11,9 @@ import ProtectedRoute from './ProtectedRoute';
 import TracklistPage from './hw1_pair/TracklistPage.jsx';
 import HomePage from './hw8/HomePage.jsx';
 import PricingStrategy from './hw8/PricingStrategy.jsx';
+import PERRiver from './hw8/PER_RiverComp.jsx';
+import Ceiling_floor from './ceiling/ceiling_floor.jsx';
+
 
 const router = createBrowserRouter([
   {
@@ -62,6 +65,22 @@ const router = createBrowserRouter([
     element: (
       //<ProtectedRoute>
         <PricingStrategy />
+      //</ProtectedRoute>
+    ),
+  },
+  {
+    path: "pe-flow-chart",
+    element: (
+      //<ProtectedRoute>
+        <PERRiver></PERRiver>
+      //</ProtectedRoute>
+    ),
+  },
+  {
+    path: "ceiling-floor",
+    element: (
+      //<ProtectedRoute>
+        <Ceiling_floor></Ceiling_floor>
       //</ProtectedRoute>
     ),
   },

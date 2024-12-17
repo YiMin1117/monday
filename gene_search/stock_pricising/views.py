@@ -192,33 +192,31 @@ def pricising_calculate(request):
 from django.http import JsonResponse
 from django.utils.timezone import localtime, now
 import twstock
+from .utils.stock_scraper_current_prices import get_stock_price  # 確保 stock_scraper.py 在 utils 資料夾下
+
 
 def current_prices(request):
-    stock_id = request.GET.get('stock')  # 從前端取得股票代號
+    """
+    從前端接收股票代碼，返回即時價格和更新時間
+    """
+    stock_id = request.GET.get('stock')  
     if not stock_id:
         return JsonResponse({"error": "缺少股票代號"}, status=400)
 
     try:
-        stock = twstock.Stock(stock_id)
-        realtime_data = twstock.realtime.get(stock_id)  # 即時數據
-        local_time = localtime(now())
+    
+        current_price, last_update_time = get_stock_price(stock_id)
 
-        if realtime_data['success'] and realtime_data['info']['time']:
-            # 檢查是否在交易時間
-            transaction_time = local_time.strftime("%H:%M:%S") < "13:30:00"
+        if current_price is None:
+            return JsonResponse({"error": f"股票代碼 {stock_id} 無法獲取即時價格"}, status=500)
 
-            if transaction_time:
-                best_bid = realtime_data['realtime']['best_bid_price'][-1]
-                best_ask = realtime_data['realtime']['best_ask_price'][-1]
-                current_price = (float(best_bid) + float(best_ask)) / 2  # 均價
-            else:
-                # 收盤後，使用最後收盤價
-                current_price = stock.price[-1] if stock.price else None
-        else:
-            return JsonResponse({"error": "無法獲取即時價格"}, status=500)
-        
-        print(current_price)
-        return JsonResponse({"currentPrice": current_price})
+        # 返回 JSON 結果
+        return JsonResponse({
+            "stockId": stock_id,
+            "currentPrice": current_price,
+            "lastUpdateTime": last_update_time
+        })
 
     except Exception as e:
+        # 捕獲所有異常，返回錯誤信息
         return JsonResponse({"error": f"發生錯誤: {str(e)}"}, status=500)

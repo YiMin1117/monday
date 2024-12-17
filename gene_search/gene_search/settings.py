@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'track',
     'stock_pricising',
+    'per_river',
+    'support_resistance',
     # 'dj_rest_auth',
     # 'allauth',
     # 'allauth.account',
